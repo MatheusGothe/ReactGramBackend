@@ -301,8 +301,6 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
         const { photoId } = req.params;
         const reqUser = req.user;
         const user = await User.findById(reqUser._id);
-  
-
 
         try {
           let photo = await Photo.findById(photoId);
@@ -321,10 +319,8 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
           res.status(500).json({ errors: ['Erro interno do servidor'] });
         }
       };
-      
-  
 
-      
+ 
 
 module.exports = {
     insertPhoto,  
@@ -338,5 +334,5 @@ module.exports = {
     commentPhoto,
     removeCommentPhoto,
     searchPhotos,
-    getPhotoLikes
+    getPhotoLikes,
 }

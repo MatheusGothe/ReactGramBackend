@@ -4,7 +4,7 @@
   const express = require("express")
   const path = require("path")
   const cors = require("cors")
-
+  const deleteExpiredStories = require('./utils/deleteExpiredStories ');
   const port = process.env.PORT
 
   const app = express()
@@ -13,11 +13,18 @@
   app.use(express.json())
   app.use(express.urlencoded({ extended: false}))
 
-    app.use(cors({
-    origin: [`http://${atualIp}:3000`,"http://localhost:3000","https://react-gram-six.vercel.app"],
-    // methods: ["GET", "POST", "PUT", "DELETE"],
-      credentials: true,
-    }));
+    app.use(
+      cors({
+        origin: [
+          `http://${atualIp}:3000`,
+          "http://localhost:3000",
+          "https://react-gram-six.vercel.app",
+          "https://react-gram-xi.vercel.app/",
+        ],
+        // methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true,
+      })
+    );
     console.log(atualIp)
 
 
@@ -34,6 +41,8 @@
   // routes
   
   const router = require('./routes/Router.js')
+
+  deleteExpiredStories()
 
   app.use(router)
 

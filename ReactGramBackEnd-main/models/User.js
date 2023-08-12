@@ -11,7 +11,8 @@ const userSchema = new Schema({
     },
     bio: String,
     followers: Array,
-    following: Array,  
+    following: Array, 
+    stories: Array 
 },{
     timestamps: true
 })
