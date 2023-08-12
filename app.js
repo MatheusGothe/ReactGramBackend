@@ -42,7 +42,7 @@
   
   const router = require('./routes/Router.js')
 
-  deleteExpiredStories()
+  //deleteExpiredStories()
 
   app.use(router)
 
