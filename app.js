@@ -13,13 +13,14 @@
   app.use(express.json())
   app.use(express.urlencoded({ extended: false}))
 
-    app.use(
+    app.use(,
       cors({
         origin: [
           `http://${atualIp}:3000`,
           "http://localhost:3000",
           "https://react-gram-six.vercel.app",
           "https://react-gram-xi.vercel.app/",
+          "https://react-gram-o9gf8i3is-matheusgothe-icloudcom.vercel.app/login",
         ],
         // methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
