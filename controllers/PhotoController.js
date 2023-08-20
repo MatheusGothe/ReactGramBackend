@@ -312,8 +312,7 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
         
             const users = await User.find({ _id: { $in: photo.likes } }, 'name _id profileImage followers following');
             res.status(200).json({users,user});
-        
-          
+                  
         } catch (error) {
           console.error(error);
           res.status(500).json({ errors: ['Erro interno do servidor'] });

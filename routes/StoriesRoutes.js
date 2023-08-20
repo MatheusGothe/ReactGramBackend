@@ -14,14 +14,14 @@ const {
 const { photoInsertValidation, photoUpdateValidation, commentValidation } = require('../middlewares/photoValidation')
 const authGuard = require('../middlewares/authGuard')
 const validate = require('../middlewares/handleValidation')
-const {imageUpload, resizeAndCompressImage} = require('../middlewares/imagemUpload')
+const {imageUpload, resizeAndCompressImage, resizeAndCompressStory} = require('../middlewares/imagemUpload')
 
 //Routes
 router.post(
   "/create",
   authGuard,
   imageUpload.single("story"),
-  resizeAndCompressImage,
+  resizeAndCompressStory,
   validate,
   postStories
 );

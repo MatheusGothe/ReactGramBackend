@@ -15,7 +15,7 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
       
           // Check if a file was uploaded
           if (!storyFile) {
-            res.status(400).json({ errors: ['É preciso enviar um arquivo'] });
+            res.status(422).json({ errors: ['É preciso enviar um arquivo'] });
             return;
           }
       
@@ -84,7 +84,8 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
       const getUserStories = async (req, res) => {
         const { id } = req.params;
         const reqUser = req.user;
-      
+
+        
         try {
           const user = await User.findById(id);
 
@@ -105,7 +106,7 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
           // Send a success response
           res.status(200).json(stories);
         } catch (error) {
-          console.error(error);
+          console.log('erro')
           res.status(500).json({ errors: ['Erro interno do servidor'] });
         }
       };
@@ -127,6 +128,7 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
           res.status(200).json({ stories: allStories });
         } catch (error) {
           console.error(error);
+          console.log('caiu')
           res.status(500).json({ errors: ['Erro interno do servidor'] });
         }
       };
