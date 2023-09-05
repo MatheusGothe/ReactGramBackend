@@ -1,6 +1,7 @@
 const schedule = require('node-schedule');
 const User = require('../models/User'); // Importe o modelo de usuário
 
+
 const deleteExpiredStories = () => {
   // Agende um trabalho para ser executado a cada hora
   schedule.scheduleJob('* * * * *', async () => {
@@ -13,11 +14,12 @@ const deleteExpiredStories = () => {
           }
         }
       });
-
-      
       // Remova as histórias expiradas de cada usuário
       for (const user of users) {
-        user.stories = user.stories.filter(story => story.expirationDate > new Date());
+        let expiredIndex;
+        while ((expiredIndex = user.stories.findIndex(story => story.expirationDate <= new Date())) !== -1) {
+          user.stories.splice(expiredIndex, 1);
+        }
         await user.save();
       }
     } catch (error) {
@@ -25,5 +27,4 @@ const deleteExpiredStories = () => {
     }
   });
 }
-
 module.exports = deleteExpiredStories;
