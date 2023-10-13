@@ -16,6 +16,8 @@ app.use(express.urlencoded({ extended: false}))
   app.use(
     cors({
       origin: [
+        "www.reactgram.com.br",
+        "reactgram.com.br",
         "https://react-gram-six.vercel.app",
         "https://react-gram-xi.vercel.app",
         "https://react-gram-o9gf8i3is-matheusgothe-icloudcom.vercel.app",
