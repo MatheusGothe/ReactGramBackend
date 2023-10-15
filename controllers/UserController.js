@@ -467,7 +467,7 @@ const sendVerificattionEmail = async(req,res) => {
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL,
       auth: {
-        user:  process.env.USER,
+        user:  process.env.USER,  
         pass:  process.env.PASSWORD,
       },
     });
@@ -478,7 +478,7 @@ const sendVerificattionEmail = async(req,res) => {
       subject: 'Ativação de conta',
       html: `
         <p>Obrigado por se registrar! Por favor, clique no link abaixo para ativar sua conta:</p>
-        <p><a href="https://reactgrambackend.onrender.com/api/users/activate/${user._id}">Ativar conta</a></p>
+        <p><a href="hhttps://reactgrambackend.onrender.com/api/users/activate/${user._id}">Ativar conta</a></p>
       `,
     };
     

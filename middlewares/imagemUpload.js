@@ -77,7 +77,7 @@ const resizeAndCompressStory = (req, res, next) => {
 
   const filePath = req.file.path;
   const width = 350;
-  const height = 700;
+  const height = 500;
   const quality = 80;
   const fillColor = '#FFFFFF'; // cor de fundo para preencher as áreas adicionais
 
