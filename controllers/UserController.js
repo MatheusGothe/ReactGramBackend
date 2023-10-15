@@ -17,47 +17,65 @@ const generateToken = (id) => {
         expiresIn: "7d",
     })
 }
-
-
-// Register user and sign in
 const register = async(req,res) =>{
     
-    const {name,email,password} = req.body //pegando nome, email e senha que chegam do corpo da requisição
+  const {name,email,password} = req.body //pegando nome, email e senha que chegam do corpo da requisição
 
-    // check if user exists
-    const user = await User.findOne({email})
+  // check if user exists
+  const user = await User.findOne({email})
 
-    if(user) {
-        res.status(422).json({errors: ['E-mail já cadastrado'] })
-        return 
-    }
+  if(user) {
+      res.status(422).json({errors: ['E-mail já cadastrado'] })
+      return 
+  }
+  
+  // Generate password hash
+  const salt = await bcrypt.genSalt()
+  const passwordHash = await bcrypt.hash(password, salt)
+
+  // Create user
+  const newUser = await User.create({
+      name,
+      email,
+      password: passwordHash
+  })
+
+  // if user was created successfully, return the token
+  if(!newUser){
+      res.status(422).json({errors:['Houve um erro, por favor tente mais tarde']})
+      return
+  }
+
+  // Send activation email
+  try {
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL,
+      auth: {
+        user:  process.env.USER,
+        pass:  process.env.PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: 'reactgram@outlook.com',
+      to: email,
+      subject: 'Ativação de conta',
+      html: `
+        <p>Obrigado por se registrar! Por favor, clique no link abaixo para ativar sua conta:</p>
+        <p><a href="https://reactgrambackend.onrender.com/api/users/activate/${newUser._id}">Ativar conta</a></p>
+      `,
+    };
     
-    // Generate password hash
-    const salt = await bcrypt.genSalt()
-    const passwordHash = await bcrypt.hash(password, salt)
+    await transporter.sendMail(mailOptions);
 
-    // Create user
-    const newUser = await User.create({
-        name,
-        email,
-        password: passwordHash
-    })
-
-    // if user was created successfully, return the token
-    if(!newUser){
-        res.status(422).json({errors:['Houve um erro, por favor tente mais tarde']})
-        return
-    }
-    
-    res.status(201).json({
-        _id: newUser._id,
-        name: newUser.name,
-        profileImage: newUser.profileImage,
-        token: generateToken(newUser._id),
-        followers: newUser.followers,
-        following: newUser.following
-    })
+    res.status(200).json({ message: 'E-mail de ativação enviado.' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ errors: ['Ocorreu um erro ao enviar o e-mail.'] });
+  }
 }
+
+
 // Sign user in
 const login = async (req,res) => {
 
@@ -77,6 +95,11 @@ const login = async (req,res) => {
         return
     }
     
+    if(!user.isActive){
+      res.status(403).json({errorCode: 403, errors: ['A conta não está ativada']})
+      return
+  }
+
     // Return user with token
     res.status(201).json({
         _id: user._id,
@@ -422,6 +445,77 @@ const unFollowUser = async (req, res) => {
     console.log(error)
   }
 }
+const sendVerificattionEmail = async(req,res) => {
+
+    const {email} = req.body
+    console.log(email)
+
+    try {
+
+    if(!email){
+      return res.status(404).json({errors: ['Informe o e-mail']})
+    }
+    // Procura o usuário pelo email
+
+    const user = await User.findOne({email});
+
+    if (!user) {
+        return res.status(404).json({ errors: ['Usuário não encontrado.'] });
+    }
+
+    // Envia o e-mail
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL,
+      auth: {
+        user:  process.env.USER,
+        pass:  process.env.PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: 'reactgram@outlook.com',
+      to: email,
+      subject: 'Ativação de conta',
+      html: `
+        <p>Obrigado por se registrar! Por favor, clique no link abaixo para ativar sua conta:</p>
+        <p><a href="https://reactgrambackend.onrender.com/api/users/activate/${user._id}">Ativar conta</a></p>
+      `,
+    };
+    
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'E-mail de ativação enviado.' });
+
+} catch (error) {
+    console.log(error);
+    res.status(500).json({ errors: ['Ocorreu um erro ao ativar o usuário.'] });
+}
+}
+
+// Ativar usuário
+const activateUser = async(req, res) => {
+  const { userId } = req.params; // pegando o userId que chega do corpo da requisição
+    console.log(userId)
+  try {
+      // Procura o usuário pelo ID
+      const user = await User.findById(userId);
+
+      if (!user) {
+          return res.status(404).json({ errors: ['Usuário não encontrado.'] });
+      }
+
+      // Ativa o usuário
+      user.isActive = true;
+      await user.save();
+
+      // Redireciona o usuário para a página de login do seu aplicativo
+      res.redirect('https://reactgram.com.br');
+  } catch (error) {
+      console.log(error);
+      res.status(500).json({ errors: ['Ocorreu um erro ao ativar o usuário.'] });
+  }
+};
+
 
 
 
@@ -437,5 +531,7 @@ module.exports = {
     unFollowUser,
     getUserFollowing,
     getUserFollowers,
-    searchUsers
+    searchUsers,
+    activateUser,
+    sendVerificattionEmail
 }

@@ -13,7 +13,9 @@ const {
   unFollowUser,
   getUserFollowing,
   getUserFollowers,
-  searchUsers
+  searchUsers,
+  activateUser,
+  sendVerificattionEmail
 } = require("../controllers/UserController");
 
 // Middlwares
@@ -45,6 +47,8 @@ router.post('/follow/:userId',authGuard,followUser)
 router.delete('/unfollow/:userId', authGuard, unFollowUser)
 router.get('/following/:userId', authGuard,getUserFollowing)
 router.get('/followers/:userId', authGuard,getUserFollowers)
+router.post('/activate/:userId',activateUser)
+router.post('/send-email',sendVerificattionEmail)
 
 
 module.exports = router;

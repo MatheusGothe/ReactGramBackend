@@ -21,7 +21,7 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
       
           // Calculate the expiration date for the story
           const expirationDate = new Date();
-           expirationDate.setHours(expirationDate.getHours() + 24);
+           expirationDate.setHours(expirationDate.getHours() + 24 );
       
           // Create a new story with an Id and expirationDate field
           const newStory = {

@@ -12,7 +12,11 @@ const userSchema = new Schema({
     bio: String,
     followers: Array,
     following: Array, 
-    stories: Array 
+    stories: Array,
+    isActive: { // Adicione este campo
+        type: Boolean,
+        default: false
+    }
 },{
     timestamps: true
 })
