@@ -8,11 +8,11 @@ const { imageUpload, resizeAndCompressImage } = require('../middlewares/imagemUp
 const insertPhoto = async (req, res) => {
   const { title } = req.body;
   const image = req.file.filename;
-
   const reqUser = req.user;
+  console.log(reqUser)
 
   const user = await User.findById(reqUser._id);
-  console.log('entrou')
+
   // Create photo
   const newPhoto = await Photo.create({
     image,
@@ -67,32 +67,35 @@ const getAllPhotos = async(req,res) => {
 
 // Get user photos
     const getUserPhotos = async(req,res) => {
-
+      
+      try {
         const {id} = req.params
-    
-        const photos = await Photo.find({userId: id})
+        const photos = await Photo.find({user: id})
             .sort([['createdAt',-1]])
             .exec()
 
         return res.status(200).json(photos)
+        
+      } catch (error) {
+        console.log(error)
+        return res.status(500).json({ errors: ['Ocorreu um erro ao buscar as fotos do usuário.'] });
+      }
 
     }    
 // Get photo by ID
     const getPhotoById = async(req,res) => {
-
+      
         const {id} = req.params
-        try{
-          const photo = await Photo.findById(new mongoose.Types.ObjectId(id)).populate('user','-password')
-            res.status(200).json(photo)
-            if(!photo){
-                res.status(404).json({errors: ['Foto não encontrada']})
-                return
-            }
-    
-        }catch(error){
-            res.status(404).json({errors: ['Foto não encontrada']})
-    
-        }
+ 
+          const photo = await Photo.findById(new mongoose.Types.ObjectId(id)).populate('-password')
+          
+          if(!photo){
+            res.status(500).json({errors: ['Foto não encontrada']})
+            return
+          }  
+          
+          res.status(200).json(photo)
+ 
     }
     // Update a photo
     const updatePhoto = async(req,res) => {
