@@ -251,179 +251,144 @@ const forgotPassword = async (req, res) => {
       res.status(500).json({ errors: ['Ocorreu um erro ao enviar o e-mail.'] });
     }
   };
-  // FOLLOW A USER
-  const followUser = async (req, res) => {
-    const { userId } = req.params;
-    const currentUser = req.user;
-  
-    const followedUser = await User.findById(userId).select(
-      "userId name profileImage followers following"
-    );
 
-    if (!followedUser) {
-      res.status(404).json({ errors: ["Usuário seguido não encontrado."] });
-      return;
-    }
-    
-    // Check if user is trying to follow himself
-    if (userId === currentUser._id.toString()) {
-      res.status(422).json({ errors: ["Você não pode se seguir."] });
-      return;
-    }
-  
-    // Check if user to follow exists
-    const userToFollow = await User.findById(userId);
-    if (!userToFollow) {
-      res.status(404).json({ errors: ["Usuário não encontrado."] });
-      return;
-    }
-  
-    // Check if user is already following the user to follow
-    const isFollowing = currentUser.following.some(user => user._id.toString() === userId);
-    if (isFollowing) {
-      res.status(422).json({ errors: ["Você já está seguindo esse usuário."] });
-      return;
-    }
-  
-    // Follow user
-    currentUser.following.push({
-      _id: userToFollow._id,
-      name: userToFollow.name,
-      profileImage: userToFollow.profileImage,
-    });
-    await currentUser.save();
-  
-    userToFollow.followers.push({
-      _id: currentUser._id,
-      name: currentUser.name,
-      profileImage: currentUser.profileImage,
-    });
-    await userToFollow.save();
-  
-    res.status(200).json({
-      message: "Usuário seguido com sucesso.",
-      user: followedUser,
-      userAtual: currentUser
-    });
-  };
+ // FOLLOW A USER
+const followUser = async (req, res) => {
+  const { userId } = req.params;
+  const currentUser = req.user;
+
+  // Check if user to follow exists
+  const userToFollow = await User.findById(userId);
+  console.log(userToFollow)
+  if (!userToFollow) {
+    res.status(404).json({ errors: ["Usuário não encontrado."] });
+    return;
+  }
+  // Check if user is trying to follow himself
+  if (userId === currentUser._id.toString()) {
+    res.status(422).json({ errors: ["Você não pode se seguir."] });
+    return;
+  }
+
+
+  // Check if user is already following the user to follow
+  const isFollowing = currentUser.following.some(user => user.toString() === userId);
+  if (isFollowing) {
+    res.status(422).json({ errors: ["Você já está seguindo esse usuário."] });
+    return;
+  }
+
+  // Follow user
+  currentUser.following.push(userToFollow._id);
+  await currentUser.save();
+
+  userToFollow.followers.push(currentUser._id);
+  await userToFollow.save();
+
+  res.status(200).json({
+    message: "Usuário seguido com sucesso.",
+    user: userToFollow,
+    userAtual: currentUser
+  });
+};
+
   
 
 
- // UNFOLLOW A USER
 const unFollowUser = async (req, res) => {
-    const { userId } = req.params;
-    const currentUser = req.user;
+  const { userId } = req.params;
+  const currentUser = req.user;
 
-    const followedUser = await User.findById(userId).select(
-      "userId name profileImage followers following"
-    );
-    if (!followedUser) {
-      res.status(404).json({ errors: ["Usuário seguido não encontrado."] });
-      return;
-    }
+  // Check if user is trying to unfollow himself
+  if (userId === currentUser._id.toString()) {
+    res.status(422).json({ errors: ["Você não pode deixar de seguir a si mesmo."] });
+    return;
+  }
 
-    // Check if user is trying to unfollow himself
-    if (userId === currentUser._id.toString()) {
-      res.status(422).json({ errors: ["Você não pode deixar de seguir a si mesmo."] });
-      return;
-    }
+  // Check if user to unfollow exists
+  const userToUnfollow = await User.findById(userId);
+  if (!userToUnfollow) {
+    res.status(404).json({ errors: ["Usuário não encontrado."] });
+    return;
+  }
 
-    // Check if user to unfollow exists
-    const userToUnfollow = await User.findById(userId);
-    if (!userToUnfollow) {
-      res.status(404).json({ errors: ["Usuário não encontrado."] });
-      return;
-    }
+  // Check if user is already not following the user to unfollow
+  const isFollowing = currentUser.following.some(user => user.toString() === userId);
+  if (!isFollowing) {
+    res.status(422).json({ errors: ["Você não está seguindo esse usuário."] });
+    return;
+  }
 
-    // Check if user is already not following the user to unfollow
-    const isFollowing = currentUser.following.some(user => user._id.toString() === userId);
-    if (!isFollowing) {
-      res.status(422).json({ errors: ["Você não está seguindo esse usuário."] });
-      return;
-    }
+  // Unfollow user
+  currentUser.following = currentUser.following.filter(user => user.toString() !== userId);
+  await currentUser.save();
 
-    // Unfollow user
-    currentUser.following = currentUser.following.filter(user => user._id.toString() !== userId);
-    await currentUser.save();
+  userToUnfollow.followers = userToUnfollow.followers.filter(user => user.toString() !== currentUser._id.toString());
+  await userToUnfollow.save();
 
-    userToUnfollow.followers = userToUnfollow.followers.filter(user => user._id.toString() !== currentUser._id.toString());
-    await userToUnfollow.save();
+  res.status(200).json({
+    message: "Usuário deixou de ser seguido com sucesso.",
+    user: userToUnfollow,
+    userAtual: currentUser
+  });
+};
 
-    console.log(followedUser)
-    res.status(200).json({
-      message: "Usuário deixou de ser seguido com sucesso.",
-      user: followedUser,
-      userAtual: currentUser
-    });
-  };
 
     
-    // GET /users/:userId/following
-  const getUserFollowing = async (req, res) => {
-    try {
-      const { userId } = req.params;
-
-      const currentUserId = req.user._id.toString()
-
-      const user = await User.findById(userId)
-       .populate('following', '_id name profileImage');
-
-      const currentUser = await User.findById(currentUserId).select('-password')
-
-      if (!user) {
-        return res.status(404).json({ error: 'Usuário não encontrado.' });
-      }
-
-      const following = user.following.map(followedUser => {
-        return {
-          userId: followedUser._id.toString(),
-          userName: followedUser.name,
-          profileImage: followedUser.profileImage
-        };
-      });
-
-      return res.status(200).json( {following,currentUser} );
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao buscar os seguidores do usuário.' });
-    }
-  };
-
-  const getUserFollowers = async(req,res) => {
+// GET /users/:userId/following
+const getUserFollowing = async (req, res) => {
+  try {
     const { userId } = req.params;
-
-  
     const currentUserId = req.user._id.toString()
-    
-    try {
-      // Busca o usuário pelo ID
-      const user = await User.findById(userId);
 
-      const currentUser = await User.findById(currentUserId).select('-password')
-      
+    // Busca o usuário pelo ID e popula 'following'
+    const user = await User.findById(userId).populate('following');
+    const currentUser = await User.findById(currentUserId).select('-password')
 
-      // Verifica se o usuário existe
-      if (!user) {
-        return res.status(404).json({ errors: ['Usuário não encontrado'] });
-      }
-
-      // Busca os IDs dos seguidores
-      const followerIds = user.followers;
-
-      // Busca os usuários correspondentes aos IDs dos seguidores
-      const followers = await User.find({ _id: { $in: followerIds } });
-
-     
-      // Retorna um array com as informações dos seguidores
-      const followersData = followers.map(follower => {
-        return {
-          userId: follower._id,
-          userName: follower.name,
-          profileImage: follower.profileImage,
-        };
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    console.log(user)
+    const following = user.following.map(followedUser => {
+      return {
+        userId: followedUser._id.toString(),
+        userName: followedUser.name,
+        profileImage: followedUser.profileImage,
+        email: followedUser.email
+        // Adicione aqui quaisquer outros campos que você queira retornar
+      };
     });
-    
-    // Retorna a lista de seguidores
+
+    return res.status(200).json( {following,currentUser} );
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Erro ao buscar os seguidores do usuário.' });
+  }
+};
+
+
+const getUserFollowers = async(req,res) => {
+  const { userId } = req.params;
+  const currentUserId = req.user._id.toString()
+  
+  try {
+    // Busca o usuário pelo ID e popula 'followers'
+    const user = await User.findById(userId).populate('followers');
+    const currentUser = await User.findById(currentUserId).select('-password')
+
+    if (!user) {
+      return res.status(404).json({ errors: ['Usuário não encontrado'] });
+    }
+
+    const followersData = user.followers.map(follower => {
+      return {
+        userId: follower._id,
+        userName: follower.name,
+        profileImage: follower.profileImage,
+        email: follower.email
+      };
+    });
+
     res.status(200).json({followersData,currentUser});
   } catch (error) {
     console.error(error);
@@ -479,7 +444,7 @@ const sendVerificattionEmail = async(req,res) => {
       html: `
         <p>Obrigado por se registrar! Por favor, clique no link abaixo para ativar sua conta:</p>
         <p><a href="hhttps://reactgrambackend.onrender.com/api/users/activate/${user._id}">Ativar conta</a></p>
-      `,
+      `,  
     };
     
     await transporter.sendMail(mailOptions);

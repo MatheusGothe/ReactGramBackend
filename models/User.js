@@ -10,8 +10,14 @@ const userSchema = new Schema({
         default: '../users/imagemPadrao.png'
     },
     bio: String,
-    followers: Array,
-    following: Array, 
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }], 
     stories: Array,
     isActive: { // Adicione este campo
         type: Boolean,
@@ -20,6 +26,8 @@ const userSchema = new Schema({
 },{
     timestamps: true
 })
+
+
 
 const User = mongoose.model('User', userSchema)
 
