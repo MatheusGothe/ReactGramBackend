@@ -87,8 +87,8 @@ const getAllPhotos = async(req,res) => {
       
         const {id} = req.params
  
-          const photo = await Photo.findById(new mongoose.Types.ObjectId(id)).populate('-password')
-          
+          const photo = await Photo.findById(id).populate('user')
+          console.log(photo)
           if(!photo){
             res.status(500).json({errors: ['Foto não encontrada']})
             return
