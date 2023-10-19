@@ -435,7 +435,7 @@ const sendVerificattionEmail = async(req,res) => {
       return res.status(404).json({errors: ['Informe o e-mail']})
     }
     // Procura o usuário pelo email
-
+    // nda
     const user = await User.findOne({email});
 
     if (!user) {
