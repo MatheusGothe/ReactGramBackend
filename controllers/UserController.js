@@ -23,11 +23,24 @@ const register = async(req,res) =>{
 
   // check if user exists
   const user = await User.findOne({email})
+  
+
+  //check if username exists
+  const userName = await User.findOne({name})
+
+  console.log(userName)
+  if(userName){
+    res.status(422).json({errors: ['O nome já cadastrado, por favor coloque outro nome.']})
+    return
+  }
+  
 
   if(user) {
       res.status(422).json({errors: ['E-mail já cadastrado'] })
       return 
   }
+
+  res.status(200).json({message: ['Usuario ativado']})
   
   // Generate password hash
   const salt = await bcrypt.genSalt()
@@ -46,7 +59,8 @@ const register = async(req,res) =>{
       return
   }
 
-  // Send activation email
+
+ // Send activation email
   try {
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL,
