@@ -131,7 +131,7 @@ const login = async (req,res) => {
     const getCurrentUser = async (req,res) => {
 
         const user = req.user
-        
+        //ffff
         res.status(200).json(user)
 
     }
